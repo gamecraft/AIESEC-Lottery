@@ -18,6 +18,9 @@ Lottery.UI = {
 	},
 	updateRounds : function() {
 		$("#roundNumber").html(Lottery.gameConfig["currentRound"]);
+	},
+	disableJokerButtons : function() {
+		$(".joker").attr("disabled", "disabled");
 	}
 };
 
@@ -31,7 +34,8 @@ Lottery.setup = function() {
 		"roundTime" : 30, // seconds
 		"jokersCount" : 10,
 		"jokersTimeout" : 15, // seconds
-		"timer" : null
+		"roundTimer" : null,
+		"jokersTimer" : null
 	};
 	Lottery.gameConfig = initialConfig;
 
@@ -40,28 +44,54 @@ Lottery.setup = function() {
 	Lottery.UI.updateRounds();
 	$("#totalRounds").html(Lottery.gameConfig["totalRounds"]);
 
-	Lottery.gameConfig["timer"] = new Timer("#timer");
-	Lottery.gameConfig["timer"].setTimeout(Lottery.gameConfig["roundTime"])
+	Lottery.gameConfig["roundTimer"] = new Timer("#timer");
+	Lottery.gameConfig["roundTimer"].setTimeout(Lottery.gameConfig["roundTime"])
+
+	Lottery.gameConfig["jokersTimer"] = new Timer("#jokersTimer");
+	Lottery.gameConfig["jokersTimer"].setTimeout(Lottery.gameConfig["jokersTimeout"])
+};
+
+Lottery.endOfRound = function() {
+	clearInterval(Lottery.gameConfig["clearCode"]);
+	if(Lottery.gameConfig["jokersCount"] > 0) {
+		console.log("15 seconds for Joker time");
+		// play joker
+		Lottery.playJoker();
+	} else {
+		// change directly round
+		Lottery.changeRound();
+	}
+};
+
+Lottery.playJoker = function() {
+	Lottery.gameConfig["jokersTimer"].reset();
+	$(".joker").removeAttr("disabled");
+	Lottery.gameConfig["jokersTimer"].start();
+	setTimeout(Lottery.changeRound, Lottery.gameConfig["jokersTimeout"] * 1000);
 };
 
 Lottery.changeRound = function() {
-	Lottery.gameConfig["timer"].reset();
-
+	Lottery.gameConfig["roundTimer"].reset();
 	Lottery.gameConfig["currentRound"]++;
+
 	if(Lottery.gameConfig["currentRound"] > Lottery.gameConfig["totalRounds"]) {
 		alert("The game has ended!");
 		clearInterval(Lottery.gameConfig["clearCode"]);
 		return;
 	}
+	// do UI changes
+	Lottery.UI.disableJokerButtons();
 	Lottery.UI.updateRounds();
+
+	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
+	Lottery.gameConfig["roundTimer"].start();
 	console.log("New round has started");
-	Lottery.gameConfig["timer"].start();
 }
 
 Lottery.start = function() {
 	// start round timer
-	Lottery.gameConfig["clearCode"] = setInterval(Lottery.changeRound, Lottery.gameConfig["roundTime"] * 1000);
-	Lottery.gameConfig["timer"].start();
+	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
+	Lottery.gameConfig["roundTimer"].start();
 }
 
 Lottery.turnAllCards = function() {

@@ -2,9 +2,6 @@ if( typeof (Lottery) === "undefined") {
 	var Lottery = {};
 	Lottery.gameConstants = {};
 }
-Lottery.gameConstants.ENTRY_FEE = 10;
-// in percents
-Lottery.gameConstants.BOOKS_AVAILABLE = true;
 
 // reward name -> {name, description, chance of winning}
 Lottery.gameConstants.rewards = {};

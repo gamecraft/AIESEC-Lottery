@@ -10,7 +10,7 @@ var Timer = function(element) {
 	this.start = function() {
 		var that = this;
 		this.clearCode = setInterval(function() {
-			if(that.current < 0) {
+			if(that.current <= 0) {
 				// dispatch event
 				console.log("Timer ended")
 				clearInterval(that.clearCode);

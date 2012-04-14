@@ -80,7 +80,12 @@ header("Content-Type: text/html; charset=utf-8");
 		</div>
 		<br />
 		<hr />
-		<h1>Jokers left : <span id="jokersCount">10</span></h1>
-		<div id="jokerCards"></div>
+		<h1>Jokers left : <span id="jokersCount">10</span> | <span id="jokersTimer"></span> seconds</h1>
+		<div id="jokerCards">
+			<input type="button" value="New Choice" id="newChoice" class="joker" disabled="disabled" />
+			<input type="button" value="Add Choice" id="addChoice" class="joker" disabled="disabled" />
+			<input type="button" value="Double" id="double" class="joker" disabled="disabled" />
+			
+		</div>
 	</body>
 </html>
