@@ -65,10 +65,13 @@ Lottery.FlipCard = function FlipCard(config) {
 		});
 	};
 	// add click handler
-	var targetObj = this;
-	$("#{0}".format(config["flipboxId"])).bind("click", {
-		context : targetObj
-	}, function(event) {
-		event.data.context.uiFlip();
-	});
+
+	/*
+	 var targetObj = this;
+	 $("#{0}".format(config["flipboxId"])).bind("click", {
+	 context : targetObj
+	 }, function(event) {
+	 event.data.context.uiFlip();
+	 });
+	 */
 }

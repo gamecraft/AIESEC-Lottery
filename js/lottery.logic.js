@@ -4,6 +4,11 @@ Lottery.FlipCardsTable = {};
 Lottery.gameConfig = {};
 
 Lottery.UI = {
+	updateUI : function() {
+		Lottery.UI.updateTeamScore();
+		Lottery.UI.updateJokersAmount();
+
+	},
 	updateTeamScore : function() {
 		$("#teamScore").html(Lottery.gameConfig["teamScore"]);
 	},
@@ -21,12 +26,32 @@ Lottery.UI = {
 	},
 	disableJokerButtons : function() {
 		$(".joker").attr("disabled", "disabled");
+	},
+	turnAllCards : function() {
+		for(var flipCardId in Lottery.FlipCardsTable) {
+			if(Lottery.FlipCardsTable.hasOwnProperty(flipCardId)) {
+				if(Lottery.FlipCardsTable[flipCardId].isFront === true) {
+					Lottery.FlipCardsTable[flipCardId].uiFlip();
+				}
+			}
+		}
+	},
+	attachCardHandlers : function() {
+		$(".flipbox").bind("click", {}, function() {
+			console.log($(this).attr("id"));
+			var reward = Lottery.play();
+			Lottery.gameConfig = reward.effect(Lottery.gameConfig);
+			Lottery.FlipCardsTable[$(this).attr("id")].uiFlip();
+			console.log(reward.description);
+			Lottery.UI.updateUI();
+		});
+	},
+	deattachCardHandlers : function() {
+		$(".flipbox").unbind("click");
 	}
 };
 
 Lottery.setup = function() {
-	console.log("GAME HAS STARTED");
-
 	var initialConfig = {
 		"teamScore" : 10,
 		"currentRound" : 1,
@@ -53,6 +78,7 @@ Lottery.setup = function() {
 
 Lottery.endOfRound = function() {
 	clearInterval(Lottery.gameConfig["clearCode"]);
+	Lottery.UI.deattachCardHandlers();
 	if(Lottery.gameConfig["jokersCount"] > 0) {
 		console.log("15 seconds for Joker time");
 		// play joker
@@ -85,24 +111,17 @@ Lottery.changeRound = function() {
 
 	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
 	Lottery.gameConfig["roundTimer"].start();
+
+	Lottery.UI.attachCardHandlers();
 	console.log("New round has started");
 }
 
 Lottery.start = function() {
+	Lottery.UI.attachCardHandlers();
 	// start round timer
 	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
 	Lottery.gameConfig["roundTimer"].start();
 }
-
-Lottery.turnAllCards = function() {
-	for(var flipCardId in Lottery.FlipCardsTable) {
-		if(Lottery.FlipCardsTable.hasOwnProperty(flipCardId)) {
-			if(Lottery.FlipCardsTable[flipCardId].isFront === true) {
-				Lottery.FlipCardsTable[flipCardId].uiFlip();
-			}
-		}
-	}
-};
 
 Lottery.isWinning = function(rewardObject, percent, lastBound) {
 	if( typeof (rewardObject.chance) !== "undefined") {
@@ -138,5 +157,5 @@ Lottery.play = function() {
 			}
 		}
 	}
-	return rewards.QUOTE;
+	return rewards.GAIN_15_POINTS;
 };

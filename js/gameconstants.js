@@ -6,51 +6,79 @@ if( typeof (Lottery) === "undefined") {
 // reward name -> {name, description, chance of winning}
 Lottery.gameConstants.rewards = {};
 
-Lottery.gameConstants.rewards.TEAM_POINTS = {
-	name : "TEAM_POINTS",
-	description : "The reward is team points for 4% of entry fee",
+Lottery.gameConstants.rewards.GAIN_15_POINTS = {
+	name : "GAIN_15_POINTS",
+	description : "Gain 15 points",
 	image : "images/team_points.png",
-	chance : 30 // in percent
+	chance : 20, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] += 15;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.BOOK = {
-	name : "BOOK",
-	description : "The player wins a book. There's a small ammount of books for winning.",
+Lottery.gameConstants.rewards.GAIN_25_POINTS = {
+	name : "GAIN_25_POINTS",
+	description : "Gain 25 points",
 	image : "images/book.png",
-	chance : 20  // in percent
+	chance : 17.5, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] += 25;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.HELP_CARD = {
-	name : "HELP_CARD",
-	description : "The player receives a +1 help card.",
+Lottery.gameConstants.rewards.GAIN_40_POINTS = {
+	name : "GAIN_40_POINTS",
+	description : "Gain 40 points",
 	image : "images/help_card.png",
-	chance : 1  // in percent
+	chance : 10, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] += 40;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.NEW_SKILL = {
-	name : "NEW_SKILL",
-	description : "One level of new skill.",
+Lottery.gameConstants.rewards.GAIN_2_JOKERS = {
+	name : "GAIN_2_JOKERS",
+	description : "Jokers count + 2",
 	image : "images/new_skill.png",
-	chance : 1  // in percent
+	chance : 15, // in percent
+	effect : function(gameConfig) {
+		gameConfig["jokersCount"] += 2;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.SKILL_POINTS = {
-	name : "SKILL_POINTS",
-	description : "The players wins 2 skill points.",
+Lottery.gameConstants.rewards.LOSE_15_POINTS = {
+	name : "LOSE_15_POINTS",
+	description : "Lose 15 points.",
 	image : "images/skill_points.png",
-	chance : 10  // in percent
+	chance : 17.5, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] -= 15;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.QUOTE = {
-	name : "QUOTE",
-	description : "The players wins a quote.",
+Lottery.gameConstants.rewards.LOSE_30_POINTS = {
+	name : "LOSE_30_POINTS",
 	image : "images/quote.png",
-	chance : 1  // in percent
+	description : "Lose 30 points",
+	chance : 12.5, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] -= 30;
+		return gameConfig;
+	}
 };
 
-Lottery.gameConstants.rewards.MODIFIER_BY_TWO = {
-	name : "MODIFIER_BY_TWO",
-	description : "New team points aquired are multiplied by two.",
+Lottery.gameConstants.rewards.BOMB = {
+	name : "BOMB",
+	description : "Lose 75% of total score",
 	image : "images/modifier_x2.png",
-	chance : 10  // in percent
+	chance : 7.5, // in percent
+	effect : function(gameConfig) {
+		gameConfig["teamScore"] -= 0.75 * gameConfig["teamScore"];
+		return gameConfig;
+	}
 };
