@@ -20,7 +20,7 @@ header("Content-Type: text/html; charset=utf-8");
 				$("#lotteryCards").children().each(function(index, item) {
 					var card = new Lottery.FlipCard({
 						flipboxId : item.id,
-						backContent : '<img src="images/back.png" />',
+						backContent : '<img src="images/front.png" />',
 						faceContent : '<img src="images/front.png" />'
 					});
 					Lottery.FlipCardsTable[item.id] = card;
@@ -57,25 +57,25 @@ header("Content-Type: text/html; charset=utf-8");
 		<h1>Team Score : <span id="teamScore">0</span></h1>
 		<div id="lotteryCards">
 			<div class="flipbox" id="flipbox">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox2">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox3">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox4">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox5">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox6">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 			<div class="flipbox" id="flipbox7">
-				<img src="images/back.png" />
+				<img src="images/front.png" />
 			</div>
 		</div>
 		<br />

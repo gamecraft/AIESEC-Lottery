@@ -24,43 +24,14 @@ Lottery.FlipCard = function FlipCard(config) {
 
 	this.uiFlip = function(content) {
 		this.isFront = !this.isFront;
+		if( typeof (content) !== "undefined") {
+			this.isFront = true;
+		}
 		$("#{0}".format(this.getId())).flip({
 			direction : 'tb',
-			content : this.getContent(),
+			content : typeof (content) !== "undefined" ? content : this.getContent(),
 			speed : 500,
 			color : "#FFFFFF"
 		});
 	}
-
-	this.flip = function(giveReward/*bool*/, flipContent) {
-		var isFront = this.isFront;
-		if(isFront && giveReward == true) {
-			var reward = Lottery.play(function() {
-				return true;
-				// for testing right now
-			});
-		}
-		var content = "";
-		var cardId = this.config["flipboxId"];
-
-		// determine the content
-		if( typeof (flipContent) !== "undefined") {
-			content = "<img src={0} />".format(flipContent);
-		} else {
-			content = (isFront && giveReward) ? "<img src={0} />".format(reward.image) : this.getContent();
-		}
-		this.isFront = !this.isFront;
-
-		$("#{0}".format(cardId)).flip({
-			direction : 'tb',
-			content : content/*turns this.isFront*/,
-			speed : 500,
-			color : "#FFFFFF",
-			onEnd : function() {
-				if( typeof (reward) !== "undefined") {
-					Lottery.turnAllCards([cardId], reward)
-				}
-			}
-		});
-	};
 }
