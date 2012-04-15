@@ -15,12 +15,6 @@ Lottery.UI = {
 	updateJokersAmount : function() {
 		$("#jokersCount").html(Lottery.gameConfig["jokersCount"]);
 	},
-	startJokersTimer : function() {
-
-	},
-	stopJokersTimer : function() {
-
-	},
 	updateRounds : function() {
 		$("#roundNumber").html(Lottery.gameConfig["currentRound"]);
 	},
@@ -53,6 +47,9 @@ Lottery.UI = {
 	},
 	attachJokersHandlers : function() {
 		$(".joker").bind("click", {}, function() {
+			if(Lottery.gameConfig["jokersCount"] <= 0) {
+				return false;
+			}
 			Lottery.gameConfig["jokersCount"]--;
 			Lottery.UI.updateJokersAmount();
 			var id = $(this).attr("id");
@@ -74,21 +71,7 @@ Lottery.UI = {
 	}
 };
 
-Lottery.applyEffect = function() {
-	$.each(Lottery.gameConfig["rewards"], function(index, item) {
-		console.log(item);
-		Lottery.gameConfig = item.effect(Lottery.gameConfig, Lottery.gameConfig["modifier"]);
-		Lottery.FlipCardsTable[Lottery.gameConfig["selectedCards"][index]].uiFlip();
-		console.log(item.description);
-		Lottery.UI.updateUI();
-	});
-	Lottery.clearRewards();
-};
-
-Lottery.clearRewards = function() {
-	Lottery.gameConfig["rewards"] = [];
-	Lottery.gameConfig["selectedCards"] = [];
-};
+// initial setup, called only once
 Lottery.setup = function() {
 	var initialConfig = {
 		"teamScore" : 10,
@@ -117,8 +100,15 @@ Lottery.setup = function() {
 	Lottery.gameConfig["jokersTimer"] = new Timer("#jokersTimer");
 	Lottery.gameConfig["jokersTimer"].setTimeout(Lottery.gameConfig["jokersTimeout"])
 };
-
-Lottery.endOfRound = function(playJokers) {
+// this method starts all game timers. There's no turning back after ! :0
+Lottery.start = function() {
+	Lottery.UI.attachCardHandlers();
+	// start round timer
+	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
+	Lottery.gameConfig["roundTimer"].start();
+};
+// this method is called when the rounder timer reaches 0
+Lottery.endOfRound = function(playJokers /*boolean*/) {
 	if( typeof (playJokers) === "undefined") {
 		playJokers = true;
 	}
@@ -128,7 +118,6 @@ Lottery.endOfRound = function(playJokers) {
 	Lottery.UI.deattachCardHandlers();
 
 	if(Lottery.gameConfig["jokersCount"] > 0 && playJokers === true) {
-		console.log("15 seconds for Joker time");
 		// play joker
 		Lottery.playJoker();
 	} else {
@@ -136,6 +125,52 @@ Lottery.endOfRound = function(playJokers) {
 		clearTimeout(Lottery.gameConfig["jokersClearCode"]);
 		Lottery.changeRound();
 	}
+};
+
+Lottery.changeRound = function() {
+	// end game conditions
+	if(Lottery.gameConfig["currentRound"] > Lottery.gameConfig["totalRounds"]) {
+		clearInterval(Lottery.gameConfig["clearCode"]);
+		alert("The game has ended!");
+		return;
+	}
+
+	Lottery.applyEffect();
+	Lottery.gameConfig["roundTimer"].reset();
+	Lottery.gameConfig["currentRound"]++;
+	Lottery.gameConfig["jokersTimer"].reset();
+
+	// reset joker modifiers
+	Lottery.gameConfig["newChoice"] = false;
+	Lottery.gameConfig["modifier"] = 1;
+
+	// do UI changes
+	Lottery.UI.turnAllCards();
+	Lottery.UI.deattachJokersHandlers();
+	Lottery.UI.disableJokerButtons();
+	Lottery.UI.updateRounds();
+
+	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
+	Lottery.gameConfig["roundTimer"].start();
+
+	Lottery.UI.attachCardHandlers();
+	console.log("New round has started");
+};
+
+Lottery.applyEffect = function() {
+	console.log("Applying effects of total ", Lottery.gameConfig["rewards"].length, " items");
+	$.each(Lottery.gameConfig["rewards"], function(index, item) {
+		Lottery.gameConfig = item.effect(Lottery.gameConfig, Lottery.gameConfig["modifier"]);
+		//Lottery.FlipCardsTable[Lottery.gameConfig["selectedCards"][index]].uiFlip();
+		//console.log(item.description);
+		Lottery.UI.updateUI();
+	});
+	Lottery.clearRewards();
+};
+
+Lottery.clearRewards = function() {
+	Lottery.gameConfig["rewards"] = [];
+	Lottery.gameConfig["selectedCards"] = [];
 };
 
 Lottery.playJoker = function() {
@@ -150,41 +185,6 @@ Lottery.playJoker = function() {
 		Lottery.changeRound();
 	}
 };
-
-Lottery.changeRound = function() {
-	Lottery.applyEffect();
-	Lottery.gameConfig["roundTimer"].reset();
-	Lottery.gameConfig["currentRound"]++;
-	Lottery.gameConfig["jokersTimer"].reset();
-
-	// reset joker modifiers
-	Lottery.gameConfig["newChoice"] = false;
-	Lottery.gameConfig["modifier"] = 1;
-
-	if(Lottery.gameConfig["currentRound"] > Lottery.gameConfig["totalRounds"]) {
-		alert("The game has ended!");
-		clearInterval(Lottery.gameConfig["clearCode"]);
-		return;
-	}
-	// do UI changes
-	Lottery.UI.turnAllCards();
-	Lottery.UI.deattachJokersHandlers();
-	Lottery.UI.disableJokerButtons();
-	Lottery.UI.updateRounds();
-
-	//Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
-	Lottery.gameConfig["roundTimer"].start();
-
-	Lottery.UI.attachCardHandlers();
-	console.log("New round has started");
-};
-
-Lottery.start = function() {
-	Lottery.UI.attachCardHandlers();
-	// start round timer
-	Lottery.gameConfig["clearCode"] = setInterval(Lottery.endOfRound, Lottery.gameConfig["roundTime"] * 1000);
-	Lottery.gameConfig["roundTimer"].start();
-}
 
 Lottery.isWinning = function(rewardObject, percent, lastBound) {
 	if( typeof (rewardObject.chance) !== "undefined") {
@@ -207,8 +207,6 @@ Lottery.percentageSum = (function() {
 
 Lottery.play = function() {
 	var drawPercent = Lottery.randomBetween(1, Lottery.percentageSum), rewards = Lottery.gameConstants.rewards;
-	console.log(drawPercent);
-
 	var bound = 1;
 
 	for(var reward in rewards) {
