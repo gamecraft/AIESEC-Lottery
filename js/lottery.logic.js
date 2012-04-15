@@ -38,18 +38,41 @@ Lottery.UI = {
 	},
 	attachCardHandlers : function() {
 		$(".flipbox").bind("click", {}, function() {
-			console.log($(this).attr("id"));
 			var reward = Lottery.play();
-			Lottery.gameConfig = reward.effect(Lottery.gameConfig);
+			Lottery.gameConfig["rewards"] = [reward];
+			Lottery.gameConfig["selectedCards"] = [$(this).attr("id")];
 			Lottery.FlipCardsTable[$(this).attr("id")].uiFlip();
-			console.log(reward.description);
-			Lottery.UI.updateUI();
+			Lottery.endOfRound();
 		});
 	},
 	deattachCardHandlers : function() {
 		$(".flipbox").unbind("click");
+	},
+	attachJokersHandlers : function() {
+		$(".joker").bind("click", {}, function() {
+			var id = $(this).attr("id");
+			if(id === "double") {
+				Lottery.gameConfig["modifier"] = 2;
+				Lottery.endOfRound(false /*no jokers time*/);
+
+			}
+			console.log($(this).val());
+		});
+	},
+	deattachJokersHandlers : function() {
+		$(".joker").unbind("click");
 	}
 };
+
+Lottery.applyEffect = function() {
+	$.each(Lottery.gameConfig["rewards"], function(index, item) {
+		console.log(item);
+		Lottery.gameConfig = item.effect(Lottery.gameConfig, Lottery.gameConfig["modifier"]);
+		Lottery.FlipCardsTable[Lottery.gameConfig["selectedCards"][index]].uiFlip();
+		console.log(item.description);
+		Lottery.UI.updateUI();
+	});
+}
 
 Lottery.setup = function() {
 	var initialConfig = {
@@ -60,7 +83,8 @@ Lottery.setup = function() {
 		"jokersCount" : 10,
 		"jokersTimeout" : 15, // seconds
 		"roundTimer" : null,
-		"jokersTimer" : null
+		"jokersTimer" : null,
+		"modifier" : 1
 	};
 	Lottery.gameConfig = initialConfig;
 
@@ -76,15 +100,22 @@ Lottery.setup = function() {
 	Lottery.gameConfig["jokersTimer"].setTimeout(Lottery.gameConfig["jokersTimeout"])
 };
 
-Lottery.endOfRound = function() {
+Lottery.endOfRound = function(playJokers) {
+	if( typeof (playJokers) === "undefined") {
+		playJokers = true;
+	}
+
 	clearInterval(Lottery.gameConfig["clearCode"]);
+	Lottery.gameConfig["roundTimer"].reset();
 	Lottery.UI.deattachCardHandlers();
-	if(Lottery.gameConfig["jokersCount"] > 0) {
+
+	if(Lottery.gameConfig["jokersCount"] > 0 && playJokers === true) {
 		console.log("15 seconds for Joker time");
 		// play joker
 		Lottery.playJoker();
 	} else {
 		// change directly round
+		clearTimeout(Lottery.gameConfig["jokersClearCode"]);
 		Lottery.changeRound();
 	}
 };
@@ -93,12 +124,15 @@ Lottery.playJoker = function() {
 	Lottery.gameConfig["jokersTimer"].reset();
 	$(".joker").removeAttr("disabled");
 	Lottery.gameConfig["jokersTimer"].start();
-	setTimeout(Lottery.changeRound, Lottery.gameConfig["jokersTimeout"] * 1000);
+	Lottery.UI.attachJokersHandlers();
+	Lottery.gameConfig["jokersClearCode"] = setTimeout(Lottery.changeRound, Lottery.gameConfig["jokersTimeout"] * 1000);
 };
 
 Lottery.changeRound = function() {
+	Lottery.applyEffect();
 	Lottery.gameConfig["roundTimer"].reset();
 	Lottery.gameConfig["currentRound"]++;
+	Lottery.gameConfig["jokersTimer"].reset();
 
 	if(Lottery.gameConfig["currentRound"] > Lottery.gameConfig["totalRounds"]) {
 		alert("The game has ended!");
@@ -106,6 +140,8 @@ Lottery.changeRound = function() {
 		return;
 	}
 	// do UI changes
+	Lottery.UI.turnAllCards();
+	Lottery.UI.deattachJokersHandlers();
 	Lottery.UI.disableJokerButtons();
 	Lottery.UI.updateRounds();
 

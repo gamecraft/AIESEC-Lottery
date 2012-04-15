@@ -23,7 +23,6 @@ Lottery.FlipCard = function FlipCard(config) {
 	this.isFront = false;
 
 	this.uiFlip = function(content) {
-		console.log("Doing an UI flip, nothing is drawed");
 		this.isFront = !this.isFront;
 		$("#{0}".format(this.getId())).flip({
 			direction : 'tb',
@@ -64,14 +63,4 @@ Lottery.FlipCard = function FlipCard(config) {
 			}
 		});
 	};
-	// add click handler
-
-	/*
-	 var targetObj = this;
-	 $("#{0}".format(config["flipboxId"])).bind("click", {
-	 context : targetObj
-	 }, function(event) {
-	 event.data.context.uiFlip();
-	 });
-	 */
 }
